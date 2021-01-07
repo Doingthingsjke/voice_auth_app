@@ -43,6 +43,15 @@
         <div type="text" class="signin_generated--phrase">
           {{ "Generated phrase for reading" }}
         </div>
+
+        <div class="signin_button">
+          <button class="signin_button--microphone" v-on:click="getAudio">
+            <img src="~/static/img/microphone.png" />
+          </button>
+          <button class="signin_button--signin" v-on:click="signIn">
+            Sign in
+          </button>
+        </div>
       </div>
     </div>
   </div>
@@ -60,6 +69,9 @@ export default {
 </script>
 
 <style>
+.sigin_generated {
+  justify-content: space-between;
+}
 .signup_body {
   display: flex;
   justify-content: space-around;

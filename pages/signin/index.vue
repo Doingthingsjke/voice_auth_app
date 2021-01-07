@@ -20,13 +20,25 @@
       <div class="signin_generated">
         <p>Please read generated phrase:</p>
         <div type="text" class="signin_generated--phrase">
-          {{ "Generated phrase for reading" }}
+          <input
+            type="password"
+            required
+            autocomplete="off"
+            v-model="password"
+            placeholder="password"
+          />
         </div>
       </div>
       <div class="signin_button">
         <button class="signin_button--microphone" v-on:click="getAudio">
           <img src="~/static/img/microphone.png" />
         </button>
+        <!-- <button v-on:click="stopRecording">
+          Stop
+        </button> -->
+      </div>
+
+      <div>
         <button class="signin_button--signin" v-on:click="signIn">
           Sign in
         </button>
@@ -46,6 +58,7 @@ export default {
     };
   },
   data: () => ({
+    audioChunks: [],
     email: "",
     password: ""
   }),
@@ -60,6 +73,43 @@ export default {
       //     this.$router.push("something");
       //   }, 500)
       // );
+    },
+    getAudio() {
+      navigator.mediaDevices.getUserMedia({ audio: true }).then(stream => {
+        const mediaRec = new MediaRecorder(stream);
+        mediaRecorder.start();
+        mediaRecorder.addEventListener("dataavailable", function(event) {
+          this.audioChunks.push(event.data);
+        });
+      });
+
+      // надо подумать, искуственная задержка или две кнопки "старт" и "стоп"
+      // можно жобавить часть с выводом аудио на экран, чтобы можно было прослушать
+      setTimeout(() => stopRecording, 120000);
+      function stopRecording() {
+        MediaRecorder.stop();
+        MediaRecorder.addEventListener("stop", function(event) {
+          const audioBlob = new Blob(this.audioChunks, {
+            type: "audio/wav"
+          });
+
+          let formData = new FormData();
+          formData.append("voice", audioBlob);
+          sendAudioToAPI(formData);
+          this.audioChunks = [];
+        });
+
+        async function sendAudioToAPI(form) {
+          let promise = await fetch(URL, {
+            method: "POST",
+            body: form
+          });
+          if (promise.ok) {
+            let response = await promise.json();
+            console.log(response.data);
+          }
+        }
+      }
     }
   }
 };
