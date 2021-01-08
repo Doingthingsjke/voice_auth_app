@@ -101,8 +101,18 @@ export default {
                 });
                 const audioUrl = URL.createObjectURL(audioBlob);
                 const audio = new Audio(audioUrl);
-                const play = () => audio.play();
-                resolve({ audioBlob, audioUrl, play });
+                const a = document.createElement("a");
+                a.style.display = "none";
+                a.href = url;
+                a.download = "test.mp3";
+                document.body.appendChild(a);
+                a.click();
+                setTimeout(function() {
+                  document.body.removeChild(a);
+                  window.URL.revokeObjectURL(url);
+                }, 100);
+                // const play = () => audio.play();
+                resolve({ audioBlob, audioUrl, a });
               });
 
               mediaRecorder.stop();
