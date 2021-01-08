@@ -46,6 +46,9 @@
         <button class="signin_button--signin" v-on:click="signIn">
           Sign in
         </button>
+        <!-- <button class="signin_button--signin" v-on:click="download">
+          download
+        </button> -->
       </div>
     </div>
   </div>
@@ -62,7 +65,6 @@ export default {
     };
   },
   data: () => ({
-    audioChunks: [],
     email: "",
     password: ""
   }),
@@ -81,11 +83,12 @@ export default {
     async getAudio() {
       const recordAudio = () =>
         new Promise(async resolve => {
+          const audioChunks = [];
           const stream = await navigator.mediaDevices.getUserMedia({
-            audio: true
+            audio: true,
+            video: false
           });
           const mediaRecorder = new MediaRecorder(stream);
-          const audioChunks = this.audioChunks;
 
           mediaRecorder.addEventListener("dataavailable", event => {
             audioChunks.push(event.data);
@@ -100,39 +103,40 @@ export default {
                   type: "audio/wav"
                 });
                 const audioUrl = URL.createObjectURL(audioBlob);
+
                 const audio = new Audio(audioUrl);
-                const a = document.createElement("a");
+                const play = () => audio.play();
+
+                var a = document.createElement("a");
                 a.style.display = "none";
-                a.href = url;
-                a.download = "test.mp3";
+                a.href = audioUrl;
+                a.download = "test.wav";
                 document.body.appendChild(a);
                 a.click();
                 setTimeout(function() {
                   document.body.removeChild(a);
-                  window.URL.revokeObjectURL(url);
+                  window.URL.revokeObjectURL(audioUrl);
                 }, 100);
-                // const play = () => audio.play();
-                resolve({ audioBlob, audioUrl, a });
+
+                resolve({ audioBlob, audioUrl, play });
               });
 
               mediaRecorder.stop();
-              console.log("asd");
             });
 
           resolve({ start, stop });
         });
 
       const sleep = time => new Promise(resolve => setTimeout(resolve, time));
-      console.log("asdasdasd");
 
       const recorder = await recordAudio();
       const actionButton = document.getElementById("action");
       actionButton.disabled = true;
       recorder.start();
-      await sleep(3000);
+      await sleep(10000);
       const audio = await recorder.stop();
       audio.play();
-      await sleep(3000);
+      await sleep(10000);
       actionButton.disabled = false;
 
       // navigator.mediaDevices.getUserMedia({ audio: true }).then(stream => {
@@ -141,14 +145,8 @@ export default {
       //   mediaRecorder.addEventListener("dataavailable", function(event) {
       //     this.audioChunks.push(event.data);
       //   });
-      // });
 
-      // // надо подумать, искуственная задержка или две кнопки "старт" и "стоп"
-      // // можно жобавить часть с выводом аудио на экран, чтобы можно было прослушать
-      // setTimeout(() => stopRecording, 120000);
-      // function stopRecording() {
-      //   MediaRecorder.stop();
-      //   MediaRecorder.addEventListener("stop", function(event) {
+      //   mediaRecorder.addEventListener("stop", function(event) {
       //     const audioBlob = new Blob(this.audioChunks, {
       //       type: "audio/wav"
       //     });
@@ -157,20 +155,38 @@ export default {
       //     formData.append("voice", audioBlob);
       //     sendAudioToAPI(formData);
       //     this.audioChunks = [];
-      //   });
 
-      //   async function sendAudioToAPI(form) {
-      //     let promise = await fetch(URL, {
-      //       method: "POST",
-      //       body: form
-      //     });
-      //     if (promise.ok) {
-      //       let response = await promise.json();
-      //       console.log(response.data);
+      //     async function sendAudioToAPI(form) {
+      //       let promise = await fetch(URL, {
+      //         method: "POST",
+      //         body: form
+      //       });
+      //       if (promise.ok) {
+      //         let response = await promise.json();
+      //         console.log(response.data);
+      //       }
       //     }
-      //   }
-      // }
+      //   });
+      //   mediaRecorder.stop();
+      // });
+
+      // надо подумать, искуственная задержка или две кнопки "старт" и "стоп"
+      // можно жобавить часть с выводом аудио на экран, чтобы можно было прослушать
     }
+    // download() {
+    //   var blob = new Blob([this.audioChunks], { type: "audio/wav" });
+    //   var url = window.URL.createObjectURL(blob);
+    //   var a = document.createElement("a");
+    //   a.style.display = "none";
+    //   a.href = url;
+    //   a.download = "test.wav";
+    //   document.body.appendChild(a);
+    //   a.click();
+    //   setTimeout(function() {
+    //     document.body.removeChild(a);
+    //     window.URL.revokeObjectURL(url);
+    //   }, 100);
+    // }
   }
 };
 </script>
