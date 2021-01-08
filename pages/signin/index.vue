@@ -30,7 +30,11 @@
         </div>
       </div>
       <div class="signin_button">
-        <button class="signin_button--microphone" v-on:click="getAudio">
+        <button
+          id="action"
+          class="signin_button--microphone"
+          v-on:click="getAudio"
+        >
           <img src="~/static/img/microphone.png" />
         </button>
         <!-- <button v-on:click="stopRecording">
@@ -74,42 +78,88 @@ export default {
       //   }, 500)
       // );
     },
-    getAudio() {
-      navigator.mediaDevices.getUserMedia({ audio: true }).then(stream => {
-        const mediaRec = new MediaRecorder(stream);
-        mediaRecorder.start();
-        mediaRecorder.addEventListener("dataavailable", function(event) {
-          this.audioChunks.push(event.data);
-        });
-      });
+    async getAudio() {
+      const recordAudio = () =>
+        new Promise(async resolve => {
+          const stream = await navigator.mediaDevices.getUserMedia({
+            audio: true
+          });
+          const mediaRecorder = new MediaRecorder(stream);
+          const audioChunks = this.audioChunks;
 
-      // надо подумать, искуственная задержка или две кнопки "старт" и "стоп"
-      // можно жобавить часть с выводом аудио на экран, чтобы можно было прослушать
-      setTimeout(() => stopRecording, 120000);
-      function stopRecording() {
-        MediaRecorder.stop();
-        MediaRecorder.addEventListener("stop", function(event) {
-          const audioBlob = new Blob(this.audioChunks, {
-            type: "audio/wav"
+          mediaRecorder.addEventListener("dataavailable", event => {
+            audioChunks.push(event.data);
           });
 
-          let formData = new FormData();
-          formData.append("voice", audioBlob);
-          sendAudioToAPI(formData);
-          this.audioChunks = [];
+          const start = () => mediaRecorder.start();
+
+          const stop = () =>
+            new Promise(resolve => {
+              mediaRecorder.addEventListener("stop", () => {
+                const audioBlob = new Blob(audioChunks, {
+                  type: "audio/wav"
+                });
+                const audioUrl = URL.createObjectURL(audioBlob);
+                const audio = new Audio(audioUrl);
+                const play = () => audio.play();
+                resolve({ audioBlob, audioUrl, play });
+              });
+
+              mediaRecorder.stop();
+              console.log("asd");
+            });
+
+          resolve({ start, stop });
         });
 
-        async function sendAudioToAPI(form) {
-          let promise = await fetch(URL, {
-            method: "POST",
-            body: form
-          });
-          if (promise.ok) {
-            let response = await promise.json();
-            console.log(response.data);
-          }
-        }
-      }
+      const sleep = time => new Promise(resolve => setTimeout(resolve, time));
+      console.log("asdasdasd");
+
+      const recorder = await recordAudio();
+      const actionButton = document.getElementById("action");
+      actionButton.disabled = true;
+      recorder.start();
+      await sleep(3000);
+      const audio = await recorder.stop();
+      audio.play();
+      await sleep(3000);
+      actionButton.disabled = false;
+
+      // navigator.mediaDevices.getUserMedia({ audio: true }).then(stream => {
+      //   const mediaRecorder = new MediaRecorder(stream);
+      //   mediaRecorder.start();
+      //   mediaRecorder.addEventListener("dataavailable", function(event) {
+      //     this.audioChunks.push(event.data);
+      //   });
+      // });
+
+      // // надо подумать, искуственная задержка или две кнопки "старт" и "стоп"
+      // // можно жобавить часть с выводом аудио на экран, чтобы можно было прослушать
+      // setTimeout(() => stopRecording, 120000);
+      // function stopRecording() {
+      //   MediaRecorder.stop();
+      //   MediaRecorder.addEventListener("stop", function(event) {
+      //     const audioBlob = new Blob(this.audioChunks, {
+      //       type: "audio/wav"
+      //     });
+
+      //     let formData = new FormData();
+      //     formData.append("voice", audioBlob);
+      //     sendAudioToAPI(formData);
+      //     this.audioChunks = [];
+      //   });
+
+      //   async function sendAudioToAPI(form) {
+      //     let promise = await fetch(URL, {
+      //       method: "POST",
+      //       body: form
+      //     });
+      //     if (promise.ok) {
+      //       let response = await promise.json();
+      //       console.log(response.data);
+      //     }
+      //   }
+      // }
     }
   }
 };
