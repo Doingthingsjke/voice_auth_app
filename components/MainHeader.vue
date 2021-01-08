@@ -10,10 +10,11 @@
         <nuxt-link to="/about">About</nuxt-link>
       </nav>
       <div class="header_contacts">
-        <div class="header_contacts--name">Мастер и Маргарита</div>
+        <div class="header_contacts--name">Voice Authentication</div>
         <div class="header_contacts--info">
-          <a href="tel:79129125246">+7 912 912-52-46</a>
-          <a href="mailto:email@emal.com" target="_blank">email@emal.com</a>
+          <div>Demo version of Application</div>
+          <!-- <a href="tel:79129125246">+7 912 912-52-46</a>
+          <a href="mailto:email@emal.com" target="_blank">email@emal.com</a> -->
         </div>
       </div>
     </div>
@@ -70,7 +71,7 @@ nav {
   display: flex;
   justify-content: space-around;
 }
-.header_contacts--info a {
-  color: #ffffff;
+.header_contacts--info div {
+  color: rgb(76, 126, 126);
 }
 </style>

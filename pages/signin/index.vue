@@ -20,13 +20,8 @@
       <div class="signin_generated">
         <p>Please read generated phrase:</p>
         <div type="text" class="signin_generated--phrase">
-          <input
-            type="password"
-            required
-            autocomplete="off"
-            v-model="password"
-            placeholder="password"
-          />
+          в наибольшей мере как нам известно от таких конфликтов страдают именно
+          женщины и девушки
         </div>
       </div>
       <div class="signin_button">
@@ -106,7 +101,7 @@ export default {
 
                 const audio = new Audio(audioUrl);
                 const play = () => audio.play();
-
+                console.log(audioUrl);
                 var a = document.createElement("a");
                 a.style.display = "none";
                 a.href = audioUrl;
@@ -116,6 +111,7 @@ export default {
                 setTimeout(function() {
                   document.body.removeChild(a);
                   window.URL.revokeObjectURL(audioUrl);
+                  alert("Спасибо, запись звука зваершена");
                 }, 100);
 
                 resolve({ audioBlob, audioUrl, play });
@@ -173,20 +169,6 @@ export default {
       // надо подумать, искуственная задержка или две кнопки "старт" и "стоп"
       // можно жобавить часть с выводом аудио на экран, чтобы можно было прослушать
     }
-    // download() {
-    //   var blob = new Blob([this.audioChunks], { type: "audio/wav" });
-    //   var url = window.URL.createObjectURL(blob);
-    //   var a = document.createElement("a");
-    //   a.style.display = "none";
-    //   a.href = url;
-    //   a.download = "test.wav";
-    //   document.body.appendChild(a);
-    //   a.click();
-    //   setTimeout(function() {
-    //     document.body.removeChild(a);
-    //     window.URL.revokeObjectURL(url);
-    //   }, 100);
-    // }
   }
 };
 </script>
@@ -197,7 +179,10 @@ export default {
   position: relative;
 }
 .signin {
-  position: absolute;
+  margin-top: 30px;
+  margin-left: auto;
+  margin-right: auto;
+  /* position: absolute; */
   top: 30%;
   width: 400px;
   height: 600px;
@@ -216,7 +201,7 @@ export default {
   align-items: center;
 }
 .signin_button--microphone {
-  background: rgb(224, 8, 8);
+  background: rgb(76, 126, 126);
   border-radius: 50%;
   height: 3em;
   width: 3em;
@@ -241,5 +226,14 @@ export default {
 .signin_button--signin {
   margin-top: 10px;
   font-size: 20px;
+}
+.signin_generated {
+  text-align: center;
+  width: 250px;
+  /* align-items: center; */
+}
+.signin_generated--phrase {
+  /* text-align: center; */
+  /* position: relative; */
 }
 </style>
