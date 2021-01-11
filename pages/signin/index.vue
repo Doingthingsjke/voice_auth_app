@@ -232,8 +232,8 @@ export default {
   width: 250px;
   /* align-items: center; */
 }
-.signin_generated--phrase {
-  /* text-align: center; */
-  /* position: relative; */
-}
+/* .signin_generated--phrase {
+  text-align: center; 
+  position: relative;
+} */
 </style>

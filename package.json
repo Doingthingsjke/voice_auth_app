@@ -9,10 +9,10 @@
     "generate": "nuxt generate"
   },
   "dependencies": {
-    "@nuxtjs/axios": "^5.12.2",
-    "core-js": "^3.6.5",
-    "mongoose": "^5.10.15",
-    "nuxt": "^2.14.6"
+    "@nuxtjs/axios": "^5.12.5",
+    "core-js": "^3.8.2",
+    "mongoose": "^5.11.11",
+    "nuxt": "^2.14.12"
   },
   "devDependencies": {}
 }
