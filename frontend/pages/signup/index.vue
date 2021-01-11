@@ -130,14 +130,10 @@ export default {
                   type: "audio/wav"
                 });
                 const audioUrl = URL.createObjectURL(audioBlob);
-
-                const audio = new Audio(audioUrl);
-                const play = () => audio.play();
-                console.log(audioUrl);
                 var a = document.createElement("a");
                 a.style.display = "none";
                 a.href = audioUrl;
-                a.download = "test.wav";
+                a.download = `voice ${this.count}.wav`;
                 document.body.appendChild(a);
                 a.click();
                 setTimeout(function() {
@@ -145,7 +141,7 @@ export default {
                   window.URL.revokeObjectURL(audioUrl);
                 }, 100);
 
-                resolve({ audioBlob, audioUrl, play });
+                resolve({ audioBlob, audioUrl });
               });
 
               mediaRecorder.stop();
@@ -155,22 +151,20 @@ export default {
         });
 
       const sleep = time => new Promise(resolve => setTimeout(resolve, time));
-
-      const recorder = await recordAudio();
       const actionButton = document.getElementById("action");
-      actionButton.disabled = true;
-      recorder.start();
-      await sleep(5000);
-      const audio = await recorder.stop();
-      const count = this.clickMe();
-      alert(`Спасибо, запись звука ${count} зваершена`);
-      audio.play();
-      await sleep(5000);
-      actionButton.disabled = false;
-    },
-    clickMe() {
-      return (this.count += 1);
-      // return (document.getElementById("action").innerHTML = this.count);
+      this.count += 1;
+
+      if (this.count >= 8) {
+        alert("Спасибо, больше нет необходимости записывать звук");
+      } else {
+        actionButton.disabled = true;
+        const recorder = await recordAudio();
+        recorder.start();
+        await sleep(5000);
+        const audio = await recorder.stop();
+        alert(`Спасибо, запись звука ${this.count} завершена`);
+        actionButton.disabled = false;
+      }
     }
   }
 };

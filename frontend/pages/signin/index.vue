@@ -60,8 +60,10 @@ export default {
     };
   },
   data: () => ({
+    audioChunks: [],
     email: "",
-    password: ""
+    password: "",
+    count: 0
   }),
   methods: {
     signIn() {
@@ -78,7 +80,7 @@ export default {
     async getAudio() {
       const recordAudio = () =>
         new Promise(async resolve => {
-          const audioChunks = [];
+          const audioChunks = this.audioChunks;
           const stream = await navigator.mediaDevices.getUserMedia({
             audio: true,
             video: false
@@ -98,23 +100,18 @@ export default {
                   type: "audio/wav"
                 });
                 const audioUrl = URL.createObjectURL(audioBlob);
-
-                const audio = new Audio(audioUrl);
-                const play = () => audio.play();
-                console.log(audioUrl);
                 var a = document.createElement("a");
                 a.style.display = "none";
                 a.href = audioUrl;
-                a.download = "test.wav";
+                a.download = `voice.wav`;
                 document.body.appendChild(a);
                 a.click();
                 setTimeout(function() {
                   document.body.removeChild(a);
                   window.URL.revokeObjectURL(audioUrl);
-                  alert("Спасибо, запись звука зваершена");
                 }, 100);
 
-                resolve({ audioBlob, audioUrl, play });
+                resolve({ audioBlob, audioUrl });
               });
 
               mediaRecorder.stop();
@@ -124,50 +121,20 @@ export default {
         });
 
       const sleep = time => new Promise(resolve => setTimeout(resolve, time));
-
-      const recorder = await recordAudio();
       const actionButton = document.getElementById("action");
-      actionButton.disabled = true;
-      recorder.start();
-      await sleep(10000);
-      const audio = await recorder.stop();
-      audio.play();
-      await sleep(10000);
-      actionButton.disabled = false;
+      this.count += 1;
 
-      // navigator.mediaDevices.getUserMedia({ audio: true }).then(stream => {
-      //   const mediaRecorder = new MediaRecorder(stream);
-      //   mediaRecorder.start();
-      //   mediaRecorder.addEventListener("dataavailable", function(event) {
-      //     this.audioChunks.push(event.data);
-      //   });
-
-      //   mediaRecorder.addEventListener("stop", function(event) {
-      //     const audioBlob = new Blob(this.audioChunks, {
-      //       type: "audio/wav"
-      //     });
-
-      //     let formData = new FormData();
-      //     formData.append("voice", audioBlob);
-      //     sendAudioToAPI(formData);
-      //     this.audioChunks = [];
-
-      //     async function sendAudioToAPI(form) {
-      //       let promise = await fetch(URL, {
-      //         method: "POST",
-      //         body: form
-      //       });
-      //       if (promise.ok) {
-      //         let response = await promise.json();
-      //         console.log(response.data);
-      //       }
-      //     }
-      //   });
-      //   mediaRecorder.stop();
-      // });
-
-      // надо подумать, искуственная задержка или две кнопки "старт" и "стоп"
-      // можно жобавить часть с выводом аудио на экран, чтобы можно было прослушать
+      if (this.count >= 2) {
+        alert("Спасибо, больше нет необходимости записывать звук");
+      } else {
+        actionButton.disabled = true;
+        const recorder = await recordAudio();
+        recorder.start();
+        await sleep(5000);
+        const audio = await recorder.stop();
+        alert(`Спасибо, запись звука завершена`);
+        actionButton.disabled = false;
+      }
     }
   }
 };
