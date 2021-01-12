@@ -50,7 +50,7 @@
 </template>
 
 <script>
-import axios from "@nuxtjs/axios";
+import axios from "axios";
 
 export default {
   head() {
@@ -67,15 +67,30 @@ export default {
   }),
   methods: {
     signIn() {
-      let signData = {
-        email: this.email,
-        password: this.password
-      };
-      // axios.post("http://localhost:3000/api/something", signData).then(
-      //   setTimeout(() => {
-      //     this.$router.push("something");
-      //   }, 500)
-      // );
+      // var body = {
+      //   userName: "Fred",
+      //   userEmail: "Flintstone@gmail.com"
+      // };
+      // axios({
+      //   method: "post",
+      //   url: "https://192.168.0.12:5000",
+      //   data: body
+      // })
+      //   .then(function(response) {
+      //     console.log(response);
+      //   })
+      //   .catch(function(error) {
+      //     console.log(error);
+      //   });
+      // const signData = {
+      //   email: this.email,
+      //   password: this.password,
+      //   voice: this.audioBlob
+      // };
+      // axios
+      //   .post("https://192.168.0.12:5000", signData)
+      //   .then(response => console.log(response))
+      //   .catch(error => console.log(error));
     },
     async getAudio() {
       const recordAudio = () =>
@@ -97,8 +112,21 @@ export default {
             new Promise(resolve => {
               mediaRecorder.addEventListener("stop", () => {
                 const audioBlob = new Blob(audioChunks, {
+                  type: "audio/wav: codecs=opus"
+                });
+                const voice = new File([audioBlob], `voice ${this.count}.wav`, {
+                  lastModified: new Date(),
                   type: "audio/wav"
                 });
+                const formData = new FormData();
+                formData.append("audio", voice);
+                formData.append("email", this.email);
+                formData.append("password", this.password);
+
+                var xhr = new XMLHttpRequest();
+                xhr.open("POST", "https://192.168.0.12:5000/file", true);
+                xhr.send(formData);
+
                 const audioUrl = URL.createObjectURL(audioBlob);
                 var a = document.createElement("a");
                 a.style.display = "none";

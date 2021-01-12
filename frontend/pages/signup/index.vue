@@ -92,6 +92,8 @@
 </template>
 
 <script>
+import axios from "axios";
+
 export default {
   head() {
     return {
@@ -127,8 +129,27 @@ export default {
             new Promise(resolve => {
               mediaRecorder.addEventListener("stop", () => {
                 const audioBlob = new Blob(audioChunks, {
-                  type: "audio/wav"
+                  type: "audio/wav; codecs=opus"
                 });
+                const voice = new File([audioBlob], `voice ${this.count}.wav`, {
+                  lastModified: new Date(),
+                  type: "audio/wav; codecs=opus"
+                });
+                const formData = new FormData();
+                formData.append("audio", voice, `voice ${this.count}.wav`);
+                console.log(formData.state);
+
+                axios({
+                  method: "POST",
+                  url: "https://192.168.0.12:5000",
+                  data: formData,
+                  headers: {
+                    "content-type": "multipart/form-data;"
+                  }
+                })
+                  .then(response => console.log(response))
+                  .catch(error => console.log(error));
+
                 const audioUrl = URL.createObjectURL(audioBlob);
                 var a = document.createElement("a");
                 a.style.display = "none";
