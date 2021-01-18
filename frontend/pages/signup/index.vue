@@ -3,13 +3,22 @@
     <form action="action_page">
       <div class="container">
         <h1>Sign Up</h1>
-        <p>Please fill in this form to create an account.</p>
+        <p>Please fill this form to create an account.</p>
+        <hr />
+
+        <label for="first_name"><b>First Name</b></label>
+        <input type="text" placeholder="Enter Email" name="email" required />
+        <hr />
+
+        <label for="second_name"><b>Second Name</b></label>
+        <input type="text" placeholder="Enter Email" name="email" required />
         <hr />
 
         <label for="email"><b>Email</b></label>
         <input type="text" placeholder="Enter Email" name="email" required />
+        <hr />
 
-        <label for="psw"><b>Password</b></label>
+        <!-- <label for="psw"><b>Password</b></label>
         <input
           type="password"
           placeholder="Enter Password"
@@ -23,68 +32,79 @@
           placeholder="Repeat Password"
           name="psw-repeat"
           required
-        />
-        <hr />
+        /> -->
+      </div>
 
+      <div class="container">
         <p>
           By creating an account you agree to our
           <a href="#">Terms & Privacy</a>.
         </p>
-        <button type="submit" class="registerbtn">Register</button>
-      </div>
-
-      <div class="container_signup">
         <p>Already have an account? <a href="#">Sign in</a>.</p>
+        <button type="submit" class="registerbtn">Register</button>
       </div>
     </form>
     <div class="container">
-      <div class="signup_generated">
-        <p>Please read generated phrase 1:</p>
+      <div class="signup_generated container">
+        <!-- <p>
+          To continue registration, you need to record your voice, saying the
+          phrases below.
+        </p>
+        <hr /> -->
+
+        <label for="phrase"><b>Please read generated phrase 1:</b></label>
         <div type="text" class="signin_generated--phrase">
-          {{ "Generated phrase for reading" }}
+          {{ phrases.a }}
         </div>
         <hr />
-        <p>Please read generated phrase 2:</p>
+
+        <label for="phrase"><b>Please read generated phrase 2:</b></label>
         <div type="text" class="signin_generated--phrase">
-          {{ "Generated phrase for reading,asdasofhah aisuaogv apishfga" }}
+          {{ phrases.b }}
         </div>
         <hr />
-        <p>Please read generated phrase 3:</p>
+
+        <label for="phrase"><b>Please read generated phrase 3:</b></label>
         <div type="text" class="signin_generated--phrase">
-          {{ "Generated phrase for reading,asdasofhah aisuaogv apishfga" }}
+          {{ phrases.c }}
         </div>
         <hr />
-        <p>Please read generated phrase 4:</p>
+
+        <label for="phrase"><b>Please read generated phrase 4:</b></label>
         <div type="text" class="signin_generated--phrase">
-          {{ "Generated phrase for reading,asdasofhah aisuaogv apishfga" }}
+          {{ phrases.d }}
         </div>
         <hr />
-        <p>Please read generated phrase 5:</p>
+
+        <label for="phrase"><b>Please read generated phrase 5:</b></label>
         <div type="text" class="signin_generated--phrase">
-          {{ "Generated phrase for reading,asdasofhah aisuaogv apishfga" }}
+          {{ phrases.e }}
         </div>
         <hr />
-        <p>Please read generated phrase 6:</p>
+
+        <label for="phrase"><b>Please read generated phrase 6:</b></label>
         <div type="text" class="signin_generated--phrase">
-          {{ "Generated phrase for reading,asdasofhah aisuaogv apishfga" }}
+          {{ phrases.f }}
         </div>
         <hr />
-        <p>Please read generated phrase 7:</p>
+
+        <label for="phrase"><b>Please read generated phrase 7:</b></label>
         <div type="text" class="signin_generated--phrase">
-          {{ "Generated phrase for reading,asdasofhah aisuaogv apishfga" }}
+          {{ phrases.g }}
         </div>
+        <hr />
 
         <div class="signin_button">
           <button
             id="action"
             class="signin_button--microphone"
-            v-on:click="getAudio"
+            v-on:click="getAudioAuth"
           >
             <img src="~/static/img/microphone.png" />
           </button>
-          <button class="signin_button--signin" v-on:click="signIn">
+          <!-- <button class="signin_button--signin" v-on:click="signIn">
             Sign up
-          </button>
+          </button> -->
         </div>
       </div>
     </div>
@@ -104,12 +124,13 @@ export default {
   data: () => ({
     audioChunks: [],
     password: "",
+    phrases: {},
     email: "",
     count: 0
   }),
   methods: {
     signIn() {},
-    async getAudio() {
+    async getAudioAuth() {
       const recordAudio = () =>
         new Promise(async resolve => {
           const audioChunks = this.audioChunks;
@@ -187,15 +208,24 @@ export default {
         actionButton.disabled = false;
       }
     }
+  },
+  mounted() {
+    axios
+      .get("https://192.168.1.35:5000/register_phrase")
+      .then(response => (this.phrases = response.data))
+      .catch(error => console.log(error));
   }
 };
 </script>
 
 <style>
+.signin_block {
+  padding-top: 10px;
+}
 .signup_body {
   position: relative;
   display: flex;
-  padding-left: 70px;
+  padding-left: 120px;
 }
 .container {
   width: 500px;
@@ -204,6 +234,7 @@ export default {
   /* align-items: justify; */
 }
 .signup_generated {
+  padding-top: 23px;
   padding-left: 50px;
 }
 
@@ -232,8 +263,10 @@ hr {
 
 /* Set a style for the submit/register button */
 .registerbtn {
-  background-color: #4caf50;
-  color: white;
+  background-color: rgb(76, 126, 126);
+  color: black;
+  font-size: 15px;
+  font-weight: bold;
   padding: 16px 20px;
   width: 100%;
   margin: 8px 0;
@@ -248,7 +281,7 @@ hr {
 
 /* Add a blue text color to links */
 a {
-  color: dodgerblue;
+  color: rgb(76, 126, 126);
 }
 
 /* Set a grey background color and center the text of the "sign in" section */
