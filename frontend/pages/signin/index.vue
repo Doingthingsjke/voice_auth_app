@@ -6,7 +6,7 @@
         <p>Your email:</p>
         <input type="text" v-model="email" placeholder="email@mail.com" />
       </div>
-      <div class="signin_password">
+      <!-- <div class="signin_password">
         <p>Your password:</p>
         <input
           type="password"
@@ -16,35 +16,28 @@
           placeholder="password"
         />
         <p class="forgot"><a href="#">Forgot Password?</a></p>
-      </div>
+      </div> -->
       <div class="signin_generated">
         <p>Please read generated phrase:</p>
         <div type="text" class="signin_generated--phrase">
-          в наибольшей мере как нам известно от таких конфликтов страдают именно
-          женщины и девушки
+          {{ phrase }}
         </div>
       </div>
       <div class="signin_button">
         <button
           id="action"
           class="signin_button--microphone"
-          v-on:click="getAudio"
+          v-on:click="getAudioAuth"
         >
           <img src="~/static/img/microphone.png" />
         </button>
-        <!-- <button v-on:click="stopRecording">
-          Stop
-        </button> -->
       </div>
 
-      <div>
+      <!-- <div>
         <button class="signin_button--signin" v-on:click="signIn">
           Sign in
         </button>
-        <!-- <button class="signin_button--signin" v-on:click="download">
-          download
-        </button> -->
-      </div>
+      </div> -->
     </div>
   </div>
 </template>
@@ -62,37 +55,38 @@ export default {
   data: () => ({
     audioChunks: [],
     email: "",
-    password: "",
+    phrase: "",
+    // password: "",
     count: 0
   }),
   methods: {
-    signIn() {
-      // var body = {
-      //   userName: "Fred",
-      //   userEmail: "Flintstone@gmail.com"
-      // };
-      // axios({
-      //   method: "post",
-      //   url: "https://192.168.0.12:5000",
-      //   data: body
-      // })
-      //   .then(function(response) {
-      //     console.log(response);
-      //   })
-      //   .catch(function(error) {
-      //     console.log(error);
-      //   });
-      // const signData = {
-      //   email: this.email,
-      //   password: this.password,
-      //   voice: this.audioBlob
-      // };
-      // axios
-      //   .post("https://192.168.0.12:5000", signData)
-      //   .then(response => console.log(response))
-      //   .catch(error => console.log(error));
-    },
-    async getAudio() {
+    // signIn() {
+    // var body = {
+    //   userName: "Fred",
+    //   userEmail: "Flintstone@gmail.com"
+    // };
+    // axios({
+    //   method: "post",
+    //   url: "https://192.168.0.12:5000",
+    //   data: body
+    // })
+    //   .then(function(response) {
+    //     console.log(response);
+    //   })
+    //   .catch(function(error) {
+    //     console.log(error);
+    //   });
+    // const signData = {
+    //   email: this.email,
+    //   password: this.password,
+    //   voice: this.audioBlob
+    // };
+    // axios
+    //   .post("https://192.168.0.12:5000", signData)
+    //   .then(response => console.log(response))
+    //   .catch(error => console.log(error));
+    // },
+    async getAudioAuth() {
       const recordAudio = () =>
         new Promise(async resolve => {
           const audioChunks = this.audioChunks;
@@ -112,34 +106,34 @@ export default {
             new Promise(resolve => {
               mediaRecorder.addEventListener("stop", () => {
                 const audioBlob = new Blob(audioChunks, {
-                  type: "audio/wav: codecs=opus"
+                  type: "audio/wav; codecs=opus"
                 });
                 const voice = new File([audioBlob], `voice ${this.count}.wav`, {
                   lastModified: new Date(),
-                  type: "audio/wav"
+                  type: "audio/wav; codecs=opus"
                 });
                 const formData = new FormData();
                 formData.append("audio", voice);
                 formData.append("email", this.email);
-                formData.append("password", this.password);
+                // formData.append("password", this.password);
 
                 var xhr = new XMLHttpRequest();
-                xhr.open("POST", "https://192.168.0.12:5000/file", true);
+                xhr.open("POST", "https://192.168.1.35:5000/signin", true);
                 xhr.send(formData);
 
-                const audioUrl = URL.createObjectURL(audioBlob);
-                var a = document.createElement("a");
-                a.style.display = "none";
-                a.href = audioUrl;
-                a.download = `voice.wav`;
-                document.body.appendChild(a);
-                a.click();
-                setTimeout(function() {
-                  document.body.removeChild(a);
-                  window.URL.revokeObjectURL(audioUrl);
-                }, 100);
+                // const audioUrl = URL.createObjectURL(audioBlob);
+                // var a = document.createElement("a");
+                // a.style.display = "none";
+                // a.href = audioUrl;
+                // a.download = `voice.wav`;
+                // document.body.appendChild(a);
+                // a.click();
+                // setTimeout(function() {
+                //   document.body.removeChild(a);
+                //   window.URL.revokeObjectURL(audioUrl);
+                // }, 100);
 
-                resolve({ audioBlob, audioUrl });
+                resolve({ audioBlob });
               });
 
               mediaRecorder.stop();
@@ -158,12 +152,18 @@ export default {
         actionButton.disabled = true;
         const recorder = await recordAudio();
         recorder.start();
-        await sleep(5000);
+        await sleep(9000);
         const audio = await recorder.stop();
         alert(`Спасибо, запись звука завершена`);
         actionButton.disabled = false;
       }
     }
+  },
+  mounted() {
+    axios
+      .get("https://192.168.1.35:5000/phrase")
+      .then(response => (this.phrase = response.data))
+      .catch(error => console.log(error));
   }
 };
 </script>
@@ -198,8 +198,8 @@ export default {
 .signin_button--microphone {
   background: rgb(76, 126, 126);
   border-radius: 50%;
-  height: 3em;
-  width: 3em;
+  height: 6em;
+  width: 6em;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -214,9 +214,9 @@ export default {
   outline: none !important;
 }
 .signin_button--microphone img {
-  padding-left: 1.9px;
-  height: 2rem;
-  width: 2rem;
+  /* padding-left: 1.9px; */
+  height: 4rem;
+  width: 4rem;
 }
 .signin_button--signin {
   margin-top: 10px;
