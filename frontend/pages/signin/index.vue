@@ -123,16 +123,19 @@ export default {
                 xhr.onload = () => {
                   if (xhr.status != 200) {
                     alert(`Error ${xhr.status}: ${xhr.statusText}`);
-                  } else if (xhr.response.data === true) {
-                    alert(`Already, check console`);
-                    console.log(xhr.response.data);
+                  } else if (xhr.response.data === "True") {
+                    alert("Готово, прверьте консоль!");
+                    console.log(
+                      xhr.response.data + "=" + "успешная авторизация!"
+                    );
                     this.$nuxt.$router.replace({ path: "/" });
                   } else {
-                    alert("failed signIn, try again");
+                    console.log(xhr.response.data);
+                    alert("Ошибка авторизации, попробуйте еще раз");
                   }
                 };
                 xhr.onerror = () => {
-                  alert("Failed POST request");
+                  alert("Ошибка POST запроса");
                 };
 
                 // const audioUrl = URL.createObjectURL(audioBlob);
@@ -226,6 +229,8 @@ export default {
 .signin_button--microphone:active,
 .signin_button--microphone:focus {
   outline: none !important;
+  box-shadow: 5px 5px 20px rgb(81, 224, 210), -5px -5px 20px rgb(81, 224, 210);
+  background-color: rgb(224, 59, 59);
 }
 .signin_button--microphone img {
   /* padding-left: 1.9px; */
