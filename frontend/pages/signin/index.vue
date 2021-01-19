@@ -123,14 +123,9 @@ export default {
                 xhr.onload = () => {
                   if (xhr.status != 200) {
                     alert(`Error ${xhr.status}: ${xhr.statusText}`);
-                  } else if (xhr.response.data === "True") {
-                    alert("Готово, прверьте консоль!");
-                    console.log(
-                      xhr.response.data + "=" + "успешная авторизация!"
-                    );
+                  } else if (xhr.responseText === "True") {
                     this.$nuxt.$router.replace({ path: "/" });
                   } else {
-                    console.log(xhr.response.data);
                     alert("Ошибка авторизации, попробуйте еще раз");
                   }
                 };
@@ -226,8 +221,9 @@ export default {
 .signin_button--microphone:hover {
   background-color: rgb(224, 59, 59);
 }
-.signin_button--microphone:active,
-.signin_button--microphone:focus {
+.signin_button--microphone:active::after,
+.signin_button--microphone:focus::after,
+.signin_button--microphone:visited::after {
   outline: none !important;
   box-shadow: 5px 5px 20px rgb(81, 224, 210), -5px -5px 20px rgb(81, 224, 210);
   background-color: rgb(224, 59, 59);
