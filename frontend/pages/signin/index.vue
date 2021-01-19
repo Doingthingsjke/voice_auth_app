@@ -120,6 +120,20 @@ export default {
                 var xhr = new XMLHttpRequest();
                 xhr.open("POST", "https://192.168.1.35:5000/signin", true);
                 xhr.send(formData);
+                xhr.onload = () => {
+                  if (xhr.status != 200) {
+                    alert(`Error ${xhr.status}: ${xhr.statusText}`);
+                  } else if (xhr.response.data === true) {
+                    alert(`Already, check console`);
+                    console.log(xhr.response.data);
+                    this.$nuxt.$router.replace({ path: "/" });
+                  } else {
+                    alert("failed signIn, try again");
+                  }
+                };
+                xhr.onerror = () => {
+                  alert("Failed POST request");
+                };
 
                 // const audioUrl = URL.createObjectURL(audioBlob);
                 // var a = document.createElement("a");
