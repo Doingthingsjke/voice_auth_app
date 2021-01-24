@@ -109,6 +109,19 @@
         </div>
         <hr />
 
+        <label for="phrase"><b>Please read generated phrase 8:</b></label>
+        <div type="text" class="signin_generated--phrase">
+          {{ phrases.h }}
+        </div>
+        <hr />
+
+        <label for="phrase"><b>Please read generated phrase 9:</b></label>
+        <div type="text" class="signin_generated--phrase">
+          {{ phrases.i }}
+        </div>
+        <hr />
+
+
         <div class="signin_button">
           <button
             id="action"
@@ -171,7 +184,7 @@ export default {
                 const audioBlob = new Blob(audioChunks, {
                   type: "audio/wav; codecs=opus"
                 });
-
+                this.audioChunks = [];
                 const voice = new File([audioBlob], `voice${this.count}.wav`, {
                   lastModified: new Date(),
                   type: "audio/wav; codecs=opus"
@@ -181,16 +194,23 @@ export default {
                 formData.append(`second_name`, this.second_name);
                 formData.append(`email`, this.email);
 
-                if (this.count === 7) {
+                if (this.count === 9) {
                   axios({
                     method: "POST",
-                    url: "https://192.168.0.11:5000/signup",
+                    url: "https://192.168.137.1:5000/signup",
                     data: formData,
                     headers: {
                       "content-type": "multipart/form-data;"
                     }
                   })
-                    .then(response => alert("Вы успешно зарегистрированы."))
+                    .then(response => {if (response.data === "Ok") {
+                      alert("Вы успешно зарегистрированы.")
+                    } else if (response.data === 1) {
+                      alert("Пользователь с данным email-адресом уже зарегистрирован.")
+                    } else {
+                      alert("Произошла ошибка.");
+                      console.log(response);
+                    }})
                     .catch(error => console.log(error));
                 }
 
@@ -219,7 +239,7 @@ export default {
       const actionButton = document.getElementById("action");
       this.count += 1;
 
-      if (this.count >= 8) {
+      if (this.count >= 10) {
         alert("Спасибо, больше нет необходимости записывать звук");
       } else {
         actionButton.disabled = true;
@@ -237,7 +257,7 @@ export default {
     this.formData = formData;
 
     axios
-      .get("https://192.168.0.11:5000/register_phrase")
+      .get("https://192.168.137.1:5000/register_phrase")
       .then(response => (this.phrases = response.data))
       .catch(error => console.log(error));
   }
