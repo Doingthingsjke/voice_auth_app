@@ -3,8 +3,13 @@
     <div class="signin">
       <h1>Sign in</h1>
       <div class="signin_email">
-        <p>Your email:</p>
-        <input type="text" v-model="email" placeholder="email@mail.com" />
+        <label for="email"><b>Email</b></label>
+        <input
+          type="text"
+          v-model="email"
+          placeholder="email@mail.com"
+          required
+        />
       </div>
       <!-- <div class="signin_password">
         <p>Your password:</p>
@@ -18,7 +23,7 @@
         <p class="forgot"><a href="#">Forgot Password?</a></p>
       </div> -->
       <div class="signin_generated">
-        <p>Please read generated phrase:</p>
+        <label for="phrase"><b>Please read generated phrase:</b></label>
         <div type="text" class="signin_generated--phrase">
           {{ phrase }}
         </div>
@@ -118,12 +123,13 @@ export default {
                 // formData.append("password", this.password);
 
                 var xhr = new XMLHttpRequest();
-                xhr.open("POST", "https://192.168.1.35:5000/signin", true);
+                xhr.open("POST", "https://192.168.0.11:5000/signin", true);
                 xhr.send(formData);
                 xhr.onload = () => {
                   if (xhr.status != 200) {
                     alert(`Error ${xhr.status}: ${xhr.statusText}`);
                   } else if (xhr.responseText === "True") {
+                    alert("Успешная аутентификация");
                     this.$nuxt.$router.replace({ path: "/" });
                   } else {
                     alert("Ошибка авторизации, попробуйте еще раз");
@@ -164,7 +170,7 @@ export default {
         actionButton.disabled = true;
         const recorder = await recordAudio();
         recorder.start();
-        await sleep(9000);
+        await sleep(8000);
         const audio = await recorder.stop();
         alert(`Спасибо, запись звука завершена`);
         actionButton.disabled = false;
@@ -173,7 +179,7 @@ export default {
   },
   mounted() {
     axios
-      .get("https://192.168.1.35:5000/phrase")
+      .get("https://192.168.0.11:5000/phrase")
       .then(response => (this.phrase = response.data))
       .catch(error => console.log(error));
   }
@@ -221,9 +227,8 @@ export default {
 .signin_button--microphone:hover {
   background-color: rgb(224, 59, 59);
 }
-.signin_button--microphone:active::after,
-.signin_button--microphone:focus::after,
-.signin_button--microphone:visited::after {
+.signin_button--microphone:active:after,
+.signin_button--microphone:focus:after {
   outline: none !important;
   box-shadow: 5px 5px 20px rgb(81, 224, 210), -5px -5px 20px rgb(81, 224, 210);
   background-color: rgb(224, 59, 59);
@@ -238,9 +243,15 @@ export default {
   font-size: 20px;
 }
 .signin_generated {
-  text-align: center;
+  text-align: left;
   width: 250px;
+  padding-left: 20px;
+  padding-bottom: 20px;
   /* align-items: center; */
+}
+.signin_email {
+  padding-top: 40px;
+  /* text-align: center; */
 }
 /* .signin_generated--phrase {
   text-align: center; 

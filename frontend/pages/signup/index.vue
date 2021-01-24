@@ -7,15 +7,30 @@
         <hr />
 
         <label for="first_name"><b>First Name</b></label>
-        <input type="text" placeholder="Enter Email" name="email" required />
+        <input
+          type="text"
+          placeholder="Alexander"
+          v-model="first_name"
+          required
+        />
         <hr />
 
         <label for="second_name"><b>Second Name</b></label>
-        <input type="text" placeholder="Enter Email" name="email" required />
+        <input
+          type="text"
+          placeholder="Petrov"
+          v-model="second_name"
+          required
+        />
         <hr />
 
         <label for="email"><b>Email</b></label>
-        <input type="text" placeholder="Enter Email" name="email" required />
+        <input
+          type="text"
+          placeholder="email@email.com"
+          v-model="email"
+          required
+        />
         <hr />
 
         <!-- <label for="psw"><b>Password</b></label>
@@ -117,23 +132,27 @@ import axios from "axios";
 export default {
   head() {
     return {
-      title: "",
+      title: "Sign up",
       meta: [{ hid: "description", name: "description", content: "Test desc" }]
     };
   },
   data: () => ({
     audioChunks: [],
-    password: "",
+    // password: "",
     phrases: {},
     email: "",
-    count: 0
+    first_name: "",
+    second_name: "",
+    count: 0,
+    formData: null
   }),
   methods: {
     signIn() {},
     async getAudioAuth() {
+      const formData = this.formData;
+      const audioChunks = this.audioChunks;
       const recordAudio = () =>
         new Promise(async resolve => {
-          const audioChunks = this.audioChunks;
           const stream = await navigator.mediaDevices.getUserMedia({
             audio: true,
             video: false
@@ -152,38 +171,42 @@ export default {
                 const audioBlob = new Blob(audioChunks, {
                   type: "audio/wav; codecs=opus"
                 });
-                const voice = new File([audioBlob], `voice ${this.count}.wav`, {
+
+                const voice = new File([audioBlob], `voice${this.count}.wav`, {
                   lastModified: new Date(),
                   type: "audio/wav; codecs=opus"
                 });
-                const formData = new FormData();
-                formData.append("audio", voice, `voice ${this.count}.wav`);
-                console.log(formData.state);
+                formData.append(`audio${this.count}`, voice);
+                formData.append(`first_name`, this.first_name);
+                formData.append(`second_name`, this.second_name);
+                formData.append(`email`, this.email);
 
-                axios({
-                  method: "POST",
-                  url: "https://192.168.0.12:5000",
-                  data: formData,
-                  headers: {
-                    "content-type": "multipart/form-data;"
-                  }
-                })
-                  .then(response => console.log(response))
-                  .catch(error => console.log(error));
+                if (this.count === 7) {
+                  axios({
+                    method: "POST",
+                    url: "https://192.168.0.11:5000/signup",
+                    data: formData,
+                    headers: {
+                      "content-type": "multipart/form-data;"
+                    }
+                  })
+                    .then(response => alert("Вы успешно зарегистрированы."))
+                    .catch(error => console.log(error));
+                }
 
-                const audioUrl = URL.createObjectURL(audioBlob);
-                var a = document.createElement("a");
-                a.style.display = "none";
-                a.href = audioUrl;
-                a.download = `voice ${this.count}.wav`;
-                document.body.appendChild(a);
-                a.click();
-                setTimeout(function() {
-                  document.body.removeChild(a);
-                  window.URL.revokeObjectURL(audioUrl);
-                }, 100);
+                // const audioUrl = URL.createObjectURL(audioBlob);
+                // var a = document.createElement("a");
+                // a.style.display = "none";
+                // a.href = audioUrl;
+                // a.download = `voice ${this.count}.wav`;
+                // document.body.appendChild(a);
+                // a.click();
+                // setTimeout(function() {
+                //   document.body.removeChild(a);
+                //   window.URL.revokeObjectURL(audioUrl);
+                // }, 100);
 
-                resolve({ audioBlob, audioUrl });
+                resolve({ audioBlob });
               });
 
               mediaRecorder.stop();
@@ -202,7 +225,7 @@ export default {
         actionButton.disabled = true;
         const recorder = await recordAudio();
         recorder.start();
-        await sleep(5000);
+        await sleep(8000);
         const audio = await recorder.stop();
         alert(`Спасибо, запись звука ${this.count} завершена`);
         actionButton.disabled = false;
@@ -210,8 +233,11 @@ export default {
     }
   },
   mounted() {
+    const formData = new FormData();
+    this.formData = formData;
+
     axios
-      .get("https://192.168.1.35:5000/register_phrase")
+      .get("https://192.168.0.11:5000/register_phrase")
       .then(response => (this.phrases = response.data))
       .catch(error => console.log(error));
   }
@@ -239,14 +265,16 @@ export default {
 }
 
 /* Full-width input fields */
-input[type="text"],
-input[type="password"] {
+input[type="text"] {
   width: 100%;
   padding: 15px;
   margin: 5px 0 22px 0;
   display: inline-block;
   border: none;
   background: #f1f1f1;
+}
+div[type="text"] {
+  padding-top: 5px;
 }
 
 input[type="text"]:focus,
