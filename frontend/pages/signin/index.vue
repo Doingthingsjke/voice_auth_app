@@ -3,10 +3,15 @@
     <div class="signin">
       <h1>Sign in</h1>
       <div class="signin_email">
-        <p>Your email:</p>
-        <input type="text" v-model="email" placeholder="email@mail.com" />
+        <label for="email"><b>Email</b></label>
+        <input
+          type="text"
+          v-model="email"
+          placeholder="email@mail.com"
+          required
+        />
       </div>
-      <div class="signin_password">
+      <!-- <div class="signin_password">
         <p>Your password:</p>
         <input
           type="password"
@@ -16,41 +21,34 @@
           placeholder="password"
         />
         <p class="forgot"><a href="#">Forgot Password?</a></p>
-      </div>
+      </div> -->
       <div class="signin_generated">
-        <p>Please read generated phrase:</p>
+        <label for="phrase"><b>Please read generated phrase:</b></label>
         <div type="text" class="signin_generated--phrase">
-          в наибольшей мере как нам известно от таких конфликтов страдают именно
-          женщины и девушки
+          {{ phrase }}
         </div>
       </div>
       <div class="signin_button">
         <button
           id="action"
           class="signin_button--microphone"
-          v-on:click="getAudio"
+          v-on:click="getAudioAuth"
         >
           <img src="~/static/img/microphone.png" />
         </button>
-        <!-- <button v-on:click="stopRecording">
-          Stop
-        </button> -->
       </div>
 
-      <div>
+      <!-- <div>
         <button class="signin_button--signin" v-on:click="signIn">
           Sign in
         </button>
-        <!-- <button class="signin_button--signin" v-on:click="download">
-          download
-        </button> -->
-      </div>
+      </div> -->
     </div>
   </div>
 </template>
 
 <script>
-import axios from "@nuxtjs/axios";
+import axios from "axios";
 
 export default {
   head() {
@@ -62,22 +60,42 @@ export default {
   data: () => ({
     audioChunks: [],
     email: "",
-    password: "",
+    phrase: "",
+    // password: "",
     count: 0
   }),
   methods: {
-    signIn() {
-      let signData = {
-        email: this.email,
-        password: this.password
-      };
-      // axios.post("http://localhost:3000/api/something", signData).then(
-      //   setTimeout(() => {
-      //     this.$router.push("something");
-      //   }, 500)
-      // );
-    },
-    async getAudio() {
+    // signIn() {
+    // var body = {
+    //   userName: "Fred",
+    //   userEmail: "Flintstone@gmail.com"
+    // };
+    // axios({
+    //   method: "post",
+    //   url: "https://192.168.0.12:5000",
+    //   data: body
+    // })
+    //   .then(function(response) {
+    //     console.log(response);
+    //   })
+    //   .catch(function(error) {
+    //     console.log(error);
+    //   });
+    // const signData = {
+    //   email: this.email,
+    //   password: this.password,
+    //   voice: this.audioBlob
+    // };
+    // axios
+    //   .post("https://192.168.0.12:5000", signData)
+    //   .then(response => console.log(response))
+    //   .catch(error => console.log(error));
+    // },
+    async getAudioAuth() {
+       axios
+	      .get("https://192.168.137.1:5000/phrase")
+	      .then(response => (this.phrase = response.data))
+	      .catch(error => console.log(error));
       const recordAudio = () =>
         new Promise(async resolve => {
           const audioChunks = this.audioChunks;
@@ -97,21 +115,47 @@ export default {
             new Promise(resolve => {
               mediaRecorder.addEventListener("stop", () => {
                 const audioBlob = new Blob(audioChunks, {
-                  type: "audio/wav"
+                  type: "audio/wav; codecs=opus"
                 });
-                const audioUrl = URL.createObjectURL(audioBlob);
-                var a = document.createElement("a");
-                a.style.display = "none";
-                a.href = audioUrl;
-                a.download = `voice.wav`;
-                document.body.appendChild(a);
-                a.click();
-                setTimeout(function() {
-                  document.body.removeChild(a);
-                  window.URL.revokeObjectURL(audioUrl);
-                }, 100);
+                const voice = new File([audioBlob], `voice ${this.count}.wav`, {
+                  lastModified: new Date(),
+                  type: "audio/wav; codecs=opus"
+                });
+                const formData = new FormData();
+                formData.append("audio", voice);
+                formData.append("email", this.email);
+                // formData.append("password", this.password);
 
-                resolve({ audioBlob, audioUrl });
+                var xhr = new XMLHttpRequest();
+                xhr.open("POST", "https://192.168.137.1:5000/signin", true);
+                xhr.send(formData);
+                xhr.onload = () => {
+                  if (xhr.status != 200) {
+                    alert(`Error ${xhr.status}: ${xhr.statusText}`);
+                  } else if (xhr.responseText === "True") {
+                    alert("Успешная аутентификация");
+                    this.$nuxt.$router.replace({ path: "/" });
+                  } else {
+                    alert("Ошибка авторизации, попробуйте еще раз");
+                  }
+                };
+                xhr.onerror = () => {
+                  alert("Ошибка POST запроса");
+                };
+
+                // const audioUrl = URL.createObjectURL(audioBlob);
+                // var a = document.createElement("a");
+                // a.style.display = "none";
+                // a.href = audioUrl;
+                // a.download = `voice.wav`;
+                // document.body.appendChild(a);
+                // a.click();
+                // setTimeout(function() {
+                //   document.body.removeChild(a);
+                //   window.URL.revokeObjectURL(audioUrl);
+                // }, 100);
+
+                resolve({ audioBlob });
               });
 
               mediaRecorder.stop();
@@ -130,12 +174,14 @@ export default {
         actionButton.disabled = true;
         const recorder = await recordAudio();
         recorder.start();
-        await sleep(5000);
+        await sleep(8000);
         const audio = await recorder.stop();
         alert(`Спасибо, запись звука завершена`);
         actionButton.disabled = false;
       }
     }
+  },
+  mounted() {
   }
 };
 </script>
@@ -170,8 +216,8 @@ export default {
 .signin_button--microphone {
   background: rgb(76, 126, 126);
   border-radius: 50%;
-  height: 3em;
-  width: 3em;
+  height: 6em;
+  width: 6em;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -181,23 +227,31 @@ export default {
 .signin_button--microphone:hover {
   background-color: rgb(224, 59, 59);
 }
-.signin_button--microphone:active,
-.signin_button--microphone:focus {
+.signin_button--microphone:active:after,
+.signin_button--microphone:focus:after {
   outline: none !important;
+  box-shadow: 5px 5px 20px rgb(81, 224, 210), -5px -5px 20px rgb(81, 224, 210);
+  background-color: rgb(224, 59, 59);
 }
 .signin_button--microphone img {
-  padding-left: 1.9px;
-  height: 2rem;
-  width: 2rem;
+  /* padding-left: 1.9px; */
+  height: 4rem;
+  width: 4rem;
 }
 .signin_button--signin {
   margin-top: 10px;
   font-size: 20px;
 }
 .signin_generated {
-  text-align: center;
+  text-align: left;
   width: 250px;
+  padding-left: 20px;
+  padding-bottom: 20px;
   /* align-items: center; */
+}
+.signin_email {
+  padding-top: 40px;
+  /* text-align: center; */
 }
 /* .signin_generated--phrase {
   text-align: center; 

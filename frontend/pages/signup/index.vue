@@ -3,13 +3,37 @@
     <form action="action_page">
       <div class="container">
         <h1>Sign Up</h1>
-        <p>Please fill in this form to create an account.</p>
+        <p>Please fill this form to create an account.</p>
+        <hr />
+
+        <label for="first_name"><b>First Name</b></label>
+        <input
+          type="text"
+          placeholder="Alexander"
+          v-model="first_name"
+          required
+        />
+        <hr />
+
+        <label for="second_name"><b>Second Name</b></label>
+        <input
+          type="text"
+          placeholder="Petrov"
+          v-model="second_name"
+          required
+        />
         <hr />
 
         <label for="email"><b>Email</b></label>
-        <input type="text" placeholder="Enter Email" name="email" required />
+        <input
+          type="text"
+          placeholder="email@email.com"
+          v-model="email"
+          required
+        />
+        <hr />
 
-        <label for="psw"><b>Password</b></label>
+        <!-- <label for="psw"><b>Password</b></label>
         <input
           type="password"
           placeholder="Enter Password"
@@ -23,68 +47,92 @@
           placeholder="Repeat Password"
           name="psw-repeat"
           required
-        />
-        <hr />
+        /> -->
+      </div>
 
+      <div class="container">
         <p>
           By creating an account you agree to our
           <a href="#">Terms & Privacy</a>.
         </p>
-        <button type="submit" class="registerbtn">Register</button>
-      </div>
-
-      <div class="container_signup">
         <p>Already have an account? <a href="#">Sign in</a>.</p>
+        <button type="submit" class="registerbtn">Register</button>
       </div>
     </form>
     <div class="container">
-      <div class="signup_generated">
-        <p>Please read generated phrase 1:</p>
+      <div class="signup_generated container">
+        <!-- <p>
+          To continue registration, you need to record your voice, saying the
+          phrases below.
+        </p>
+        <hr /> -->
+
+        <label for="phrase"><b>Please read generated phrase 1:</b></label>
         <div type="text" class="signin_generated--phrase">
-          {{ "Generated phrase for reading" }}
+          {{ phrases.a }}
         </div>
         <hr />
-        <p>Please read generated phrase 2:</p>
+
+        <label for="phrase"><b>Please read generated phrase 2:</b></label>
         <div type="text" class="signin_generated--phrase">
-          {{ "Generated phrase for reading,asdasofhah aisuaogv apishfga" }}
+          {{ phrases.b }}
         </div>
         <hr />
-        <p>Please read generated phrase 3:</p>
+
+        <label for="phrase"><b>Please read generated phrase 3:</b></label>
         <div type="text" class="signin_generated--phrase">
-          {{ "Generated phrase for reading,asdasofhah aisuaogv apishfga" }}
+          {{ phrases.c }}
         </div>
         <hr />
-        <p>Please read generated phrase 4:</p>
+
+        <label for="phrase"><b>Please read generated phrase 4:</b></label>
         <div type="text" class="signin_generated--phrase">
-          {{ "Generated phrase for reading,asdasofhah aisuaogv apishfga" }}
+          {{ phrases.d }}
         </div>
         <hr />
-        <p>Please read generated phrase 5:</p>
+
+        <label for="phrase"><b>Please read generated phrase 5:</b></label>
         <div type="text" class="signin_generated--phrase">
-          {{ "Generated phrase for reading,asdasofhah aisuaogv apishfga" }}
+          {{ phrases.e }}
         </div>
         <hr />
-        <p>Please read generated phrase 6:</p>
+
+        <label for="phrase"><b>Please read generated phrase 6:</b></label>
         <div type="text" class="signin_generated--phrase">
-          {{ "Generated phrase for reading,asdasofhah aisuaogv apishfga" }}
+          {{ phrases.f }}
         </div>
         <hr />
-        <p>Please read generated phrase 7:</p>
+
+        <label for="phrase"><b>Please read generated phrase 7:</b></label>
         <div type="text" class="signin_generated--phrase">
-          {{ "Generated phrase for reading,asdasofhah aisuaogv apishfga" }}
+          {{ phrases.g }}
         </div>
+        <hr />
+
+        <label for="phrase"><b>Please read generated phrase 8:</b></label>
+        <div type="text" class="signin_generated--phrase">
+          {{ phrases.h }}
+        </div>
+        <hr />
+
+        <label for="phrase"><b>Please read generated phrase 9:</b></label>
+        <div type="text" class="signin_generated--phrase">
+          {{ phrases.i }}
+        </div>
+        <hr />
+
 
         <div class="signin_button">
           <button
             id="action"
             class="signin_button--microphone"
-            v-on:click="getAudio"
+            v-on:click="getAudioAuth"
           >
             <img src="~/static/img/microphone.png" />
           </button>
-          <button class="signin_button--signin" v-on:click="signIn">
+          <!-- <button class="signin_button--signin" v-on:click="signIn">
             Sign up
-          </button>
+          </button> -->
         </div>
       </div>
     </div>
@@ -92,25 +140,32 @@
 </template>
 
 <script>
+import axios from "axios";
+
 export default {
   head() {
     return {
-      title: "",
+      title: "Sign up",
       meta: [{ hid: "description", name: "description", content: "Test desc" }]
     };
   },
   data: () => ({
     audioChunks: [],
-    password: "",
+    // password: "",
+    phrases: {},
     email: "",
-    count: 0
+    first_name: "",
+    second_name: "",
+    count: 0,
+    formData: null
   }),
   methods: {
     signIn() {},
-    async getAudio() {
+    async getAudioAuth() {
+      const formData = this.formData;
+      const audioChunks = this.audioChunks;
       const recordAudio = () =>
         new Promise(async resolve => {
-          const audioChunks = this.audioChunks;
           const stream = await navigator.mediaDevices.getUserMedia({
             audio: true,
             video: false
@@ -127,21 +182,51 @@ export default {
             new Promise(resolve => {
               mediaRecorder.addEventListener("stop", () => {
                 const audioBlob = new Blob(audioChunks, {
-                  type: "audio/wav"
+                  type: "audio/wav; codecs=opus"
                 });
-                const audioUrl = URL.createObjectURL(audioBlob);
-                var a = document.createElement("a");
-                a.style.display = "none";
-                a.href = audioUrl;
-                a.download = `voice ${this.count}.wav`;
-                document.body.appendChild(a);
-                a.click();
-                setTimeout(function() {
-                  document.body.removeChild(a);
-                  window.URL.revokeObjectURL(audioUrl);
-                }, 100);
+                this.audioChunks = [];
+                const voice = new File([audioBlob], `voice${this.count}.wav`, {
+                  lastModified: new Date(),
+                  type: "audio/wav; codecs=opus"
+                });
+                formData.append(`audio${this.count}`, voice);
+                formData.append(`first_name`, this.first_name);
+                formData.append(`second_name`, this.second_name);
+                formData.append(`email`, this.email);
 
-                resolve({ audioBlob, audioUrl });
+                if (this.count === 9) {
+                  axios({
+                    method: "POST",
+                    url: "https://192.168.137.1:5000/signup",
+                    data: formData,
+                    headers: {
+                      "content-type": "multipart/form-data;"
+                    }
+                  })
+                    .then(response => {if (response.data === "Ok") {
+                      alert("Вы успешно зарегистрированы.")
+                    } else if (response.data === 1) {
+                      alert("Пользователь с данным email-адресом уже зарегистрирован.")
+                    } else {
+                      alert("Произошла ошибка.");
+                      console.log(response);
+                    }})
+                    .catch(error => console.log(error));
+                }
+
+                // const audioUrl = URL.createObjectURL(audioBlob);
+                // var a = document.createElement("a");
+                // a.style.display = "none";
+                // a.href = audioUrl;
+                // a.download = `voice ${this.count}.wav`;
+                // document.body.appendChild(a);
+                // a.click();
+                // setTimeout(function() {
+                //   document.body.removeChild(a);
+                //   window.URL.revokeObjectURL(audioUrl);
+                // }, 100);
+
+                resolve({ audioBlob });
               });
 
               mediaRecorder.stop();
@@ -154,27 +239,39 @@ export default {
       const actionButton = document.getElementById("action");
       this.count += 1;
 
-      if (this.count >= 8) {
+      if (this.count >= 10) {
         alert("Спасибо, больше нет необходимости записывать звук");
       } else {
         actionButton.disabled = true;
         const recorder = await recordAudio();
         recorder.start();
-        await sleep(5000);
+        await sleep(8000);
         const audio = await recorder.stop();
         alert(`Спасибо, запись звука ${this.count} завершена`);
         actionButton.disabled = false;
       }
     }
+  },
+  mounted() {
+    const formData = new FormData();
+    this.formData = formData;
+
+    axios
+      .get("https://192.168.137.1:5000/register_phrase")
+      .then(response => (this.phrases = response.data))
+      .catch(error => console.log(error));
   }
 };
 </script>
 
 <style>
+.signin_block {
+  padding-top: 10px;
+}
 .signup_body {
   position: relative;
   display: flex;
-  padding-left: 70px;
+  padding-left: 120px;
 }
 .container {
   width: 500px;
@@ -183,18 +280,21 @@ export default {
   /* align-items: justify; */
 }
 .signup_generated {
+  padding-top: 23px;
   padding-left: 50px;
 }
 
 /* Full-width input fields */
-input[type="text"],
-input[type="password"] {
+input[type="text"] {
   width: 100%;
   padding: 15px;
   margin: 5px 0 22px 0;
   display: inline-block;
   border: none;
   background: #f1f1f1;
+}
+div[type="text"] {
+  padding-top: 5px;
 }
 
 input[type="text"]:focus,
@@ -211,8 +311,10 @@ hr {
 
 /* Set a style for the submit/register button */
 .registerbtn {
-  background-color: #4caf50;
-  color: white;
+  background-color: rgb(76, 126, 126);
+  color: black;
+  font-size: 15px;
+  font-weight: bold;
   padding: 16px 20px;
   width: 100%;
   margin: 8px 0;
@@ -227,7 +329,7 @@ hr {
 
 /* Add a blue text color to links */
 a {
-  color: dodgerblue;
+  color: rgb(76, 126, 126);
 }
 
 /* Set a grey background color and center the text of the "sign in" section */
