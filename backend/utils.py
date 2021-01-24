@@ -2,6 +2,7 @@
 # coding: utf-8
 
 import os
+import io
 import re
 import sys
 import json
@@ -12,7 +13,7 @@ import audiosegment
 
 
 def voice_activity_detection(fname):
-    signal = audiosegment.from_file(fname)  # Ограничение поставить, что вав... или нет
+    signal = audiosegment.from_file(fname) 
     signal = signal.resample(sample_rate_Hz=64000, sample_width=2, channels=1)
     signal = signal.filter_silence(duration_s=0.5, threshold_percentage=1.0)
     dir = os.path.dirname(fname)
@@ -22,7 +23,7 @@ def voice_activity_detection(fname):
         os.mkdir(dirname(new_dir))
     if not os.path.exists(new_dir):
         os.mkdir(new_dir)
-    signal.export(new_fname, format="wav")  # Можно ли убрать загрузку в файл снова?
+    signal.export(new_fname, format="wav") 
     return new_fname
 
 
@@ -31,6 +32,7 @@ def get_wav_signal(fname):
     fs, signal = wavfile.read(sound_after_vad)
     if len(signal.shape) != 1:  # to mono
         signal = signal[:, 0]
+    os.remove(sound_after_vad)
     return fs, signal
 
 # for comparison

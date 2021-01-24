@@ -20,16 +20,14 @@ from utils import get_wav_signal, load_json
 
 
 class Authenticator(object):
-    def __init__(self, input_dir1):
-        self.legitimate_dir = input_dir1
+    def __init__(self):
+        self.legitimate_dir = None
         self.n_neigh = 7
         self.LOF = LocalOutlierFactor(n_neighbors=self.n_neigh, novelty=True)
-        self._train()
         # speech recognition
         self.recognizer = Recognizer()
         self.reco_treshold = 0.7
         # test
-        self.transcr = load_json('./data/transcription.json')
         self.vect = CountVectorizer(max_features=5000, binary=True)
 
     def _train(self):
@@ -53,8 +51,10 @@ class Authenticator(object):
         self.LOF.fit(features)
         shutil.rmtree(self.legitimate_dir + "aftervad")
 
-    def authenticate(self, wav_record):
+    def authenticate(self, input_dir1, wav_record, true_text):
         if wav_record:
+            self.legitimate_dir = input_dir1
+            self._train()
             # LOF prediction
             fs, signal = get_wav_signal(wav_record)
             ftr = get_features(fs, signal)
@@ -63,16 +63,16 @@ class Authenticator(object):
             predict = self.LOF.predict(test_features)
             # Speech recognition
             index = os.path.basename(wav_record).split('.')[0]
-            true_text = normalize_text(self.transcr[index])
+            true_text_norm = normalize_text(true_text)
             pron = self.recognizer.recognize(wav_record)
             pron_text = normalize_text(pron)
             if pron_text:
                 # Check phrase (vectorizing for comparison)
-                self.vect.fit([true_text])
-                true_vect = self.vect.transform([true_text]).toarray()[0]
-                print('\nФраза-образец, её нормальная форма и векторное представление:\n', self.transcr[index]+"\n", true_text+"\n", '--->', true_vect)
+                self.vect.fit([true_text_norm])
+                true_vect = self.vect.transform([true_text_norm]).toarray()[0]
+                # print('\nФраза-образец, её нормальная форма и векторное представление:\n', true_text+"\n", true_text_norm+"\n", '--->', true_vect)
                 new_vect = self.vect.transform([pron_text]).toarray()[0]
-                print('Произнесённая фраза, её нормальная форма и векторное представление:\n', pron+"\n", pron_text+"\n", '--->', new_vect)
+                # print('Произнесённая фраза, её нормальная форма и векторное представление:\n', pron+"\n", pron_text+"\n", '--->', new_vect)
                 reco_accuracy = compare_vectors(true_vect, new_vect)
             else:  # If record is empty
                 reco_accuracy = 0.0
@@ -127,11 +127,3 @@ class Authenticator(object):
         fpr = fp/(fp + tn)
         fnr = fn/(tp + fn)
         return acc, fpr, fnr
-
-
-if __name__ == "__main__":
-    a = Authenticator('./data/legitim_user')
-    # print(a.test('/home/anna/Загрузки/voice-auth/data/test', [0] * 31 + [1] * 10))
-    print(a.authenticate('./data/test/m09.wav'))
-
-
