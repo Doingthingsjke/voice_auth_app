@@ -92,6 +92,10 @@ export default {
     //   .catch(error => console.log(error));
     // },
     async getAudioAuth() {
+       axios
+	      .get("https://192.168.137.1:5000/phrase")
+	      .then(response => (this.phrase = response.data))
+	      .catch(error => console.log(error));
       const recordAudio = () =>
         new Promise(async resolve => {
           const audioChunks = this.audioChunks;
@@ -123,7 +127,7 @@ export default {
                 // formData.append("password", this.password);
 
                 var xhr = new XMLHttpRequest();
-                xhr.open("POST", "https://192.168.0.11:5000/signin", true);
+                xhr.open("POST", "https://192.168.137.1:5000/signin", true);
                 xhr.send(formData);
                 xhr.onload = () => {
                   if (xhr.status != 200) {
@@ -178,10 +182,6 @@ export default {
     }
   },
   mounted() {
-    axios
-      .get("https://192.168.0.11:5000/phrase")
-      .then(response => (this.phrase = response.data))
-      .catch(error => console.log(error));
   }
 };
 </script>
